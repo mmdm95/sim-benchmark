@@ -108,7 +108,7 @@ Note: Returns an array like below format
 
 ```php
 array [
-    'time' => $time, // 2 microsecon(s), etc.
+    'time' => $time, // 2 microsecond(s), etc.
     'memory' => $memory // 10MiB, etc.
 ]
 ```
