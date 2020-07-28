@@ -1,6 +1,6 @@
 <?php
 
-namespace Sim\Benchmark\Util;
+namespace Sim\Benchmark\Utils;
 
 class BenchmarkUtil
 {
