@@ -12,7 +12,7 @@ then put file to your project library and use it like other libraries.
 
 ## How to use
 ```php
-// to instance a crypt object
+// to instance a benchamrk object
 $benchmark = new Benchmark();
 $label = 'a label';
 
