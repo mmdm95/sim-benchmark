@@ -4,6 +4,7 @@ use Sim\Benchmark\Benchmark;
 use Sim\Benchmark\Exceptions\BenchmarkException;
 
 include_once '../../vendor/autoload.php';
+//include_once '../../autoloader.php';
 
 $benchmark = new Benchmark();
 $name1 = 'md5';
