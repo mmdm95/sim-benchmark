@@ -3,9 +3,8 @@ declare(ticks=1);
 
 namespace Sim\Benchmark;
 
-
 use Sim\Benchmark\Exceptions\BenchmarkException;
-use Sim\Benchmark\Util\BenchmarkUtil;
+use Sim\Benchmark\Utils\BenchmarkUtil;
 
 class Benchmark implements IBenchmark
 {
