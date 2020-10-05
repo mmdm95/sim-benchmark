@@ -16,7 +16,7 @@ Just add line below to autoload files:
 require_once 'path_to_library/autoloader.php';
 ```
 
-and your good to go.
+and you are good to go.
 
 ## How to use
 ```php
