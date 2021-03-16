@@ -136,25 +136,28 @@ class Benchmark implements IBenchmark
     {
         $report = $this->get($name);
         $sep = '_';
-        echo PHP_EOL;
+        $space = ' ';
+        echo "<pre>";
+        echo "<br>";
         echo str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (24));
-        echo PHP_EOL;
-        echo '|' . str_repeat(' ', ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
-        echo PHP_EOL;
-        echo '|' . str_repeat(' ', strlen($name)) . ' name ' . str_repeat(' ', strlen($name)) . '|';
-        echo str_repeat(' ', strlen($report['time'])) . ' time ' . str_repeat(' ', strlen($report['time'])) . '|';
-        echo str_repeat(' ', strlen($report['memory'])) . ' memory ' . str_repeat(' ', strlen($report['memory'])) . '|';
-        echo PHP_EOL;
+        echo "<br>";
+        echo '|' . str_repeat($space, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
+        echo "<br>";
+        echo '|' . str_repeat($space, strlen($name)) . ' name ' . str_repeat($space, strlen($name)) . '|';
+        echo str_repeat($space, strlen($report['time'])) . ' time ' . str_repeat($space, strlen($report['time'])) . '|';
+        echo str_repeat($space, strlen($report['memory'])) . ' memory ' . str_repeat($space, strlen($report['memory'])) . '|';
+        echo "<br>";
         echo '|' . str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
-        echo PHP_EOL;
-        echo '|' . str_repeat(' ', ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
-        echo PHP_EOL;
-        echo '| ' . $name . str_repeat(' ', strlen($name) + 5) . '| ';
-        echo $report['time'] . str_repeat(' ', strlen($report['time']) + 5) . '| ';
-        echo $report['memory'] . str_repeat(' ', strlen($report['memory']) + 7) . '|';
-        echo PHP_EOL;
+        echo "<br>";
+        echo '|' . str_repeat($space, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
+        echo "<br>";
+        echo '|' . $space . $name . str_repeat($space, strlen($name) + 5) . '|' . $space;
+        echo $report['time'] . str_repeat($space, strlen($report['time']) + 5) . '|' . $space;
+        echo $report['memory'] . str_repeat($space, strlen($report['memory']) + 7) . '|';
+        echo "<br>";
         echo '|' . str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
-        echo PHP_EOL;
+        echo "<br>";
+        echo "</pre>";
     }
 
     /**
