@@ -66,4 +66,12 @@ interface IBenchmark
      * @return int
      */
     public function getMemory(string $name): int;
+
+    /**
+     * Get memory peak usage only
+     *
+     * @param string $name
+     * @return int
+     */
+    public function getMemoryPeak(string $name): int;
 }

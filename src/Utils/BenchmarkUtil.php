@@ -16,6 +16,14 @@ class BenchmarkUtil
     }
 
     /**
+     * @return int
+     */
+    public static function memory_peak_usage(): int
+    {
+        return memory_get_peak_usage(true);
+    }
+
+    /**
      * @see https://alexwebdevelop.com/monitor-script-memory-usage/#:~:text=A%20PHP%20script%20can%20use,to%20the%20script's%20memory%20usage.
      *
      * @return int
@@ -57,7 +65,6 @@ class BenchmarkUtil
                 $i++;
                 if ($number > 1000) {
                     $number *= 1000;
-                    var_dump($number);
                     $i++;
                     if ($number > 60) {
                         $number /= 60;

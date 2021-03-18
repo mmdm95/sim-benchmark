@@ -55,6 +55,9 @@ class Benchmark implements IBenchmark
             if (!isset($this->start_benchmarks[$name]['memory'])) {
                 $this->start_benchmarks[$name]['memory'] = BenchmarkUtil::memory_usage();
             }
+            if (!isset($this->start_benchmarks[$name]['memory_peak'])) {
+                $this->start_benchmarks[$name]['memory_peak'] = BenchmarkUtil::memory_peak_usage();
+            }
         }
         return $this;
     }
@@ -70,6 +73,7 @@ class Benchmark implements IBenchmark
             !isset($this->pause_benchmarks[$name]['time'][$this->counter[$name]])) {
             $this->pause_benchmarks[$name]['time'][$this->counter[$name]] = microtime(true);
             $this->pause_benchmarks[$name]['memory'][$this->counter[$name]] = max($this->max_memory, BenchmarkUtil::memory_usage());
+            $this->pause_benchmarks[$name]['memory_peak'][$this->counter[$name]] = max($this->max_memory, BenchmarkUtil::memory_peak_usage());
         }
         return $this;
     }
@@ -86,6 +90,9 @@ class Benchmark implements IBenchmark
             $this->resume_benchmarks[$name]['memory'][$this->counter[$name]] =
                 max($this->pause_benchmarks[$name]['memory'][$this->counter[$name]],
                     BenchmarkUtil::memory_usage());
+            $this->resume_benchmarks[$name]['memory_peak'][$this->counter[$name]] =
+                max($this->pause_benchmarks[$name]['memory_peak'][$this->counter[$name]],
+                    BenchmarkUtil::memory_peak_usage());
             $this->counter[$name]++;
         }
         return $this;
@@ -110,6 +117,16 @@ class Benchmark implements IBenchmark
                 }
                 $this->stop_benchmarks[$name]['memory'] = $memory;
             }
+            if (!isset($this->stop_benchmarks[$name]['memory_peak'])) {
+                if (isset($this->resume_benchmarks[$name]['memory_peak'])) {
+                    $memoryPeak = max($this->resume_benchmarks[$name]['memory_peak'][$this->counter[$name] - 1],
+                        BenchmarkUtil::memory_peak_usage());
+                } else {
+                    $memoryPeak = max($this->start_benchmarks[$name]['memory_peak'],
+                        BenchmarkUtil::memory_peak_usage());
+                }
+                $this->stop_benchmarks[$name]['memory_peak'] = $memoryPeak;
+            }
         }
         return $this;
     }
@@ -121,10 +138,12 @@ class Benchmark implements IBenchmark
     public function get(string $name): array
     {
         $memory = BenchmarkUtil::memoryUnitNNumber($this->getMemory($name));
+        $memoryPeak = BenchmarkUtil::memoryUnitNNumber($this->getMemoryPeak($name));
         $time = BenchmarkUtil::timeUnitNNumber($this->getTime($name));
         return [
             'time' => $time['number'] . ' ' . $time['unit'],
             'memory' => $memory['number'] . $memory['unit'],
+            'memory_peak' => $memoryPeak['number'] . $memoryPeak['unit'],
         ];
     }
 
@@ -139,23 +158,25 @@ class Benchmark implements IBenchmark
         $space = ' ';
         echo "<pre>";
         echo "<br>";
-        echo str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (24));
+        echo str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory']) + strlen($report['memory_peak'])) * 2) + (38));
         echo "<br>";
-        echo '|' . str_repeat($space, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
+        echo '|' . str_repeat($space, ((strlen($name) + strlen($report['time']) + strlen($report['memory']) + strlen($report['memory_peak'])) * 2) + (36)) . '|';
         echo "<br>";
         echo '|' . str_repeat($space, strlen($name)) . ' name ' . str_repeat($space, strlen($name)) . '|';
         echo str_repeat($space, strlen($report['time'])) . ' time ' . str_repeat($space, strlen($report['time'])) . '|';
         echo str_repeat($space, strlen($report['memory'])) . ' memory ' . str_repeat($space, strlen($report['memory'])) . '|';
+        echo str_repeat($space, strlen($report['memory_peak'])) . ' memory peak ' . str_repeat($space, strlen($report['memory_peak'])) . '|';
         echo "<br>";
-        echo '|' . str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
+        echo '|' . str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory']) + strlen($report['memory_peak'])) * 2) + (36)) . '|';
         echo "<br>";
-        echo '|' . str_repeat($space, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
+        echo '|' . str_repeat($space, ((strlen($name) + strlen($report['time']) + strlen($report['memory']) + strlen($report['memory_peak'])) * 2) + (36)) . '|';
         echo "<br>";
         echo '|' . $space . $name . str_repeat($space, strlen($name) + 5) . '|' . $space;
         echo $report['time'] . str_repeat($space, strlen($report['time']) + 5) . '|' . $space;
-        echo $report['memory'] . str_repeat($space, strlen($report['memory']) + 7) . '|';
+        echo $report['memory'] . str_repeat($space, strlen($report['memory']) + 7) . '|' . $space;
+        echo $report['memory_peak'] . str_repeat($space, strlen($report['memory_peak']) + 12) . '|';
         echo "<br>";
-        echo '|' . str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory'])) * 2) + (22)) . '|';
+        echo '|' . str_repeat($sep, ((strlen($name) + strlen($report['time']) + strlen($report['memory']) + strlen($report['memory_peak'])) * 2) + (36)) . '|';
         echo "<br>";
         echo "</pre>";
     }
@@ -214,6 +235,36 @@ class Benchmark implements IBenchmark
         $memory = ($stop - $resumeLastMemory) + $pausedMemory + ($pausedFirstMemory - $start);
 
         return $memory;
+    }
+
+    /**
+     * {@inheritdoc}
+     * @throws BenchmarkException
+     */
+    public function getMemoryPeak(string $name): int
+    {
+        $start = ($this->start_benchmarks[$name]['memory_peak']) ?? null;
+        $stop = ($this->stop_benchmarks[$name]['memory_peak']) ?? null;
+        $pause = ($this->pause_benchmarks[$name]['memory_peak']) ?? null;
+        $resume = ($this->resume_benchmarks[$name]['memory_peak']) ?? null;
+
+        if (is_null($start) || is_null($stop)) {
+            throw new BenchmarkException("Benchmark memory peak does not start/stop");
+        }
+
+        $pausedMemory = 0;
+        $pausedFirstMemory = 0;
+        $resumeLastMemory = 0;
+        if (!is_null($pause) && !is_null($resume) && 0 != count($pause) && count($pause) == count($resume)) {
+            $pausedFirstMemory = array_shift($pause);
+            $resumeLastMemory = array_pop($resume);
+            foreach ($pause as $c => $m) { // $counter => $memory
+                $pausedMemory += $resume[$c - 1] - $m;
+            }
+        }
+        $memoryPeak = ($stop - $resumeLastMemory) + $pausedMemory + ($pausedFirstMemory - $start);
+
+        return $memoryPeak;
     }
 
     /**
